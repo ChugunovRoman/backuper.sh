@@ -1,15 +1,29 @@
 #!/bin/bash
 
-lsb_distr=`lsb_release -i`;
-lsb_distrRelease=`lsb_release -r`;
-lsb_distr=${lsb_distr:16};
-lsb_distrRelease=${lsb_distrRelease:9};
 mountpoint=`lsblk -o MOUNTPOINT | grep MyDisk`;
+to="${mountpoint}/Soft/OS/Linux/Backup-images";
+from="/";
+argv=$@;
+media="";
 
-dateTime=`bash -c "date '+%d.%m.%y-%H:%M:%S'"`
-exList="${mountpoint}/Soft/OS/Linux/Backup-images/exclude_list"
-backupRchive="${mountpoint}/Soft/OS/Linux/Backup-images/${lsb_distr}${lsb_distrRelease}${1}_${dateTime}.tar.gz"
+# Если первый аргумент пустой
+if [ ! -z "$1" ]
+    then
+        from="${1}";
+fi
 
-echo "Команда: tar czf $backupRchive --exclude-from=$exList /";
+# Если второй аргумент пустой
+if [ ! -z "$2" ]
+    then
+        to="${2}";
+fi
 
-bash -c "tar czf $backupRchive --exclude-from=$exList /"
+# Если есть такой аргумет, то добавляем в исключение папку /media
+if [[ "$argv" == *--media* || "$argv" == *-m* || "$argv" == *m* ]]; then
+    media=",\"/media/*\"";
+fi
+
+# Выводим команду в терминал и выполняем ее
+cmd="rsync -aAXv ${from} --exclude={\"/dev/*\",\"/proc/*\",\"/sys/*\",\"/tmp/*\",\"/run/*\",\"/mnt/*\"${media},\"/lost+found\"} ${to}"
+echo "line: ${cmd}";
+bash -c "${cmd}"
