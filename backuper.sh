@@ -27,3 +27,4 @@ fi
 cmd="rsync -aAXv ${from} --exclude={\"/dev/*\",\"/proc/*\",\"/sys/*\",\"/tmp/*\",\"/run/*\",\"/mnt/*\"${media},\"/lost+found\"} ${to}"
 echo "line: ${cmd}";
 bash -c "${cmd}"
+
